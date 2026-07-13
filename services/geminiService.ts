@@ -1,14 +1,26 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize the Google GenAI SDK with the API key from environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+const getAIInstance = (): GoogleGenAI => {
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("API Key is missing");
+  }
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
 
 export const generateAIResponse = async (userMessage: string): Promise<string> => {
-  if (!process.env.API_KEY) {
-    return "API Key is missing. Please contact the administrator.";
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return "API Key is missing. Please contact the administrator or configure the GEMINI_API_KEY environment variable.";
   }
 
   try {
+    const ai = getAIInstance();
     const systemPrompt = `You are a helpful, professional, and safety-conscious AI assistant for "GIRIRAJ ELECTRICALS WORKS", a premier electrical company in Kolkata. 
     
     Company Info:
